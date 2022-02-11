@@ -5,7 +5,6 @@ import model.dao.SellerDao;
 import model.entitites.Department;
 import model.entitites.Seller;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
