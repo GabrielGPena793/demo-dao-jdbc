@@ -62,7 +62,6 @@ public class SellerDaoJDBC implements SellerDao {
     @Override
     public void update(Seller obj) {
         PreparedStatement st = null;
-        ResultSet rs = null;
 
         try {
             st = conn.prepareStatement("""
@@ -84,13 +83,33 @@ public class SellerDaoJDBC implements SellerDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
         }
     }
 
     @Override
     public void deleteById(Integer id) {
+        PreparedStatement st = null;
 
+        try {
+            st = conn.prepareStatement("""
+                    DELETE FROM seller
+                    WHERE Id = ?
+                    """);
+
+            st.setInt(1, id);
+
+            int rows = st.executeUpdate(); // ativa a execução da consulta
+
+            if (rows == 0 ){
+                throw new DbException("No exists id");
+            }
+
+        } catch (SQLException e) {
+           throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
