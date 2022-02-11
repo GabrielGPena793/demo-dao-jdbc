@@ -36,6 +36,7 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public Seller fingById(Integer id) {
+
         PreparedStatement st = null;
         ResultSet rs = null;
 
@@ -50,20 +51,10 @@ public class SellerDaoJDBC implements SellerDao {
             );
             st.setInt(1, id);
             rs = st.executeQuery();
+            //começa numa posição vazia, usamos rs.next() para ir para as proximas linhas da tabela
             if (rs.next()){
-
-                Department dep = new Department();
-                dep.setId(rs.getInt("DepartmentId"));
-                dep.setName(rs.getString("DepName"));
-
-                Seller seller = new Seller();
-                seller.setId(rs.getInt("Id"));
-                seller.setName(rs.getString("Name"));
-                seller.setEmail(rs.getString("Email"));
-                seller.setBaseSalary(rs.getDouble("BaseSalary"));
-                seller.setBirthDate(rs.getDate("BirthDate"));
-                seller.setDepartment(dep);
-
+                Department dep = instantiateDepartment(rs);
+                Seller seller = instatiateSeller(rs, dep);
                 return seller;
             }
         } catch (SQLException e){
@@ -74,6 +65,28 @@ public class SellerDaoJDBC implements SellerDao {
         }
 
         return null;
+    }
+
+    //instaciando o seller a partir dos dados do banco
+    private Seller instatiateSeller(ResultSet rs, Department dep) throws SQLException {
+
+        Seller seller = new Seller();
+        seller.setId(rs.getInt("Id"));
+        seller.setName(rs.getString("Name"));
+        seller.setEmail(rs.getString("Email"));
+        seller.setBaseSalary(rs.getDouble("BaseSalary"));
+        seller.setBirthDate(rs.getDate("BirthDate"));
+        seller.setDepartment(dep);
+
+        return seller;
+    }
+
+    //instaciando o Department a partir dos dados do banco
+    private Department instantiateDepartment(ResultSet rs) throws SQLException {
+        Department dep = new Department();
+        dep.setId(rs.getInt("DepartmentId"));
+        dep.setName(rs.getString("DepName"));
+        return dep;
     }
 
     @Override
