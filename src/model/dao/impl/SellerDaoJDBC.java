@@ -94,6 +94,44 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public List<Seller> findAll() {
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
+        try {
+            st = conn.prepareStatement("""
+                    SELECT seller.*,department.Name as DepName
+                    FROM seller INNER JOIN department
+                    ON seller.DepartmentId = department.Id
+                    ORDER BY Name
+                    """);
+
+            rs = st.executeQuery();
+
+            List<Seller> sellers = new ArrayList<>();
+            Map<Integer, Department> list = new HashMap<>();
+
+            while (rs.next()){
+
+                Department dep = list.get(rs.getInt("DepartmentId"));
+
+                if (dep == null){
+                    dep = instantiateDepartment(rs);
+                    list.put(rs.getInt("DepartmentId"), dep);
+                }
+
+                sellers.add(instatiateSeller(rs, dep));
+            }
+
+            return sellers;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            DB.closeStatement(st);
+            DB.closeResultSet(rs);
+        }
+
         return null;
     }
 
@@ -115,12 +153,13 @@ public class SellerDaoJDBC implements SellerDao {
             rs = st.executeQuery();
 
             List<Seller> sellers = new ArrayList<>();
-            Map<Integer,Department> map = new HashMap<>();
+            Map<Integer,Department> map = new HashMap<>(); // faz parte da lógica de ter apenas um departamento instanciado;
 
             while (rs.next()){
 
                 Department dep = map.get(rs.getInt("DepartmentId"));
 
+                //verifica se já está instanciado o departamento, e evita criar outro do mesmo tipo;
                 if (dep == null) {
                     dep = instantiateDepartment(rs);
                     map.put(rs.getInt("DepartmentId"), dep);
